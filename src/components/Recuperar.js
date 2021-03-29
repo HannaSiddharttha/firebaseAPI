@@ -50,6 +50,12 @@ function recuperar(usuario) {
     })
     .catch(e => {
         console.log(e.message)
+        if (e.message == "The email address is badly formatted.") {
+            window.alert("Ingrese correctamente el correo electrónico.")
+        } else if(e.message == "There is no user record corresponding to this identifier. The user may have been deleted.")
+        {
+            alert("La cuenta no ha sido encontrada")
+        }
     })
 
 }

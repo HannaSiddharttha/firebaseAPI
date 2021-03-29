@@ -17,7 +17,7 @@ function App() {
   return (
     
     <Router>
-      <Navbar/>
+      <Bygoogle/>
         <div>
         <Switch>
          <Route path = "/servicios" component = {Servicios} /> 

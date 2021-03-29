@@ -10,12 +10,16 @@ export const Registro= ()  =>{
     const [password, setPassword]= useState()
     const [repassword, setRePassword]= useState()
 
-    const handleSubmit =(e) => {
-        e.preventDefault()
-        add(usuario, password)
-    
+     const handleSubmit = (e) => {
 
-    }
+     e.preventDefault()
+        if (password==repassword) {
+            add(usuario, password)
+        } else {
+            window.alert("Las contraseñas no coinciden.")
+        }
+
+     }
 
     return(
         <div className = "row">
@@ -53,6 +57,13 @@ function add(email, password) {
     })
     .catch(e =>{
         console.log(e.message)
+        if (e.message == "Password should be at least 6 characters") {
+            window.alert("La contraseña es muy corta, debe de ser al menos de 6 caracteres.")
+        } else if (e.message == "The email address is already in use by another account.") {
+            window.alert("Este correo electrónico ya corresponde a una cuenta.")
+        } else if (e.message == "The email address is badly formatted.") {
+            window.alert("Ingrese correctamente el correo electrónico.")
+        }
     })
     
 }
