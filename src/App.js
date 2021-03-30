@@ -12,14 +12,15 @@ import {Servicios} from './components/Servicios'
 import { Nosotros } from './components/Nosotros';
 import { Registro } from './components/Registrar';
 import { Recuperar } from './components/Recuperar';
-
+import { Chat } from'./components/Chat';
 function App() {
   return (
     
     <Router>
       <Bygoogle/>
-        <div>
+        <div class="main-container">
         <Switch>
+         <Route path = "/chat" component = {Chat}/>
          <Route path = "/servicios" component = {Servicios} /> 
          <Route path = "/login" component = {Login} />
          <Route path = "/contactanos" component = {Contactanos} /> 

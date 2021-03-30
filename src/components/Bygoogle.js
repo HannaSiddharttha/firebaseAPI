@@ -9,6 +9,17 @@ import {Link} from 'react-router-dom';
 const firebaseApp = firebase.initializeApp(firebaseConfig)
 
 class Bygoogle extends Component{
+  /*
+  componentDidMount () {
+    console.log("hola")
+    const script = document.createElement("script");
+
+    script.src = "/js/chat-button.js";
+    script.async = true;
+
+    document.body.appendChild(script);
+  }
+  */
 
     render(){
         const{
@@ -41,7 +52,7 @@ class Bygoogle extends Component{
 
 
               <li className="nav-item">
-                <Link className="nav-link active" aria-current="page" to="/">Home</Link>
+                <Link className="nav-link" aria-current="page" to="/">Home</Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link" to="/nosotros">Nosotros</Link>
@@ -60,6 +71,9 @@ class Bygoogle extends Component{
               </li>
                <li className="nav-item">
                 <Link className="nav-link" to="/contactanos">Contactanos</Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/chat">Chat</Link>
               </li>
                <li className="nav-item">
                 <Link onClick={signOut} className="nav-link" to="/login">Cerrar Sesión ({firebase.auth().currentUser.email})</Link>
