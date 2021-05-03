@@ -1,5 +1,5 @@
 .btn-grad {
-    background-image: linear-gradient(to right, #F7971E 0%, #FFD200 51%, #F7971E 100%)
+    background-image: linear-gradient(to right, #000000 0%, #434343 51%, #000000 100%);
 }
 
 .btn-grad {
@@ -15,6 +15,7 @@
     display: block;
     font-family: 'Century Gothic';
 }
+
 
 .btn-grad:hover {
     background-position: right center;

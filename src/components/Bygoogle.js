@@ -84,7 +84,7 @@ class Bygoogle extends Component{
       </nav>)
       :( <div className="container-fluid mt-5">
                         <div className="d-flex justify-content-center mt-4">
-                          <Link class="btn btn-lg px-3 btn-outline-info" onClick ={signInWithGoogle} role="button"><img src="./google_logo.png" height="30" alt="Google"></img>  &nbsp; Iniciar Sesión con Google</Link>
+                          <Link class="btn btn-lg px-3 btn-outline-info" onClick ={signInWithGoogle} role="button"><img src="./logogoogle1.png" height="30" alt="Google"></img>  &nbsp; Iniciar Sesión con Google</Link>
                         </div>
                       </div>)
                 }
