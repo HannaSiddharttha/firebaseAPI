@@ -5,6 +5,7 @@ import 'firebase/auth'
 import firebaseConfig  from '../firebaseConfig'
 import {Redirect} from 'react-router-dom'
 import {Link} from 'react-router-dom';
+import FacebookLogin from 'react-facebook-login';
 
 const firebaseApp = firebase.initializeApp(firebaseConfig)
 
@@ -26,11 +27,19 @@ class Bygoogle extends Component{
             user,
             signOut,
             signInWithGoogle,
-        
+            signInWithFacebook,
         } = this.props;
 
         var a ="usuario"
+        const responseFacebook = (response) => {
+        console.log("Este es el nombre completo: "+response.name);
+        console.log("Este es el correo: "+response.email);
+        console.log("Esta es la foto: "+response.picture.data.url);
+      }
 
+      const componentClicked=()=>{
+        alert('Evento onClick');
+      }
         return(
             <div>
 
@@ -82,11 +91,23 @@ class Bygoogle extends Component{
           </div>
         </div>
       </nav>)
-      :( <div className="container-fluid mt-5">
-                        <div className="d-flex justify-content-center mt-4">
-                          <Link class="btn btn-lg px-3 btn-outline-info" onClick ={signInWithGoogle} role="button"><img src="./logogoogle1.png" height="30" alt="Google"></img>  &nbsp; Iniciar Sesión con Google</Link>
-                        </div>
-                      </div>)
+      :( 
+      <div>
+        <div className="container-fluid mt-5">
+            <div className="d-flex justify-content-center mt-4">
+              <Link className="btn btn-lg px-3 btn-outline-info" onClick ={signInWithGoogle} role="button"><img src="./logogoogle1.png" height="30" alt="Google"></img>  &nbsp; Iniciar Sesión con Google</Link>
+              <Link className="btn btn-lg px-3 btn-outline-info" onClick ={signInWithFacebook} role="button"><img src="./logogoogle1.png" height="30" alt="Facebook"></img>  &nbsp; Iniciar Sesión con Facebook</Link>
+            </div>
+          </div>
+          {/* <FacebookLogin
+          appId="486988992425977"
+          autoLoad={true}
+          fields="name,email,picture"
+          callback={responseFacebook}
+          textButton="Iniciar Sesión con Facebook"
+          icon="fa-facebook" /> */}
+      </div>
+      )
                 }
 
             </div>
@@ -100,6 +121,7 @@ const firebaseAppAuth = firebaseApp.auth();
 const providers = {
 
     googleProvider: new firebase.auth.GoogleAuthProvider(),
+    facebookProvider: new firebase.auth.FacebookAuthProvider(),
 }
 
 export default withFirebaseAuth({
