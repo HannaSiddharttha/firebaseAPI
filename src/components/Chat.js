@@ -137,11 +137,35 @@ export const Chat = () => (
 
   function ChatMessage(props){
 
+    console.log(props)
     const {text,uid,photoURL} = props.message
     const messageClass = uid === auth.currentUser.uid ? 'msg_cotainer_send' : 'msg_cotainer'
     const positionClass = uid === auth.currentUser.uid ? 'justify-content-end' : 'justify-content-start'
     var leftIcon = null
     var rightIcon = null
+    var date = new Date(props.message.createdAt.seconds * 1000);
+
+    const months = {
+      0: 'January',
+      1: 'February',
+      2: 'March',
+      3: 'April',
+      4: 'May',
+      5: 'June',
+      6: 'July',
+      7: 'August',
+      8: 'September',
+      9: 'October',
+      10: 'November',
+      11: 'December'
+    }
+
+    const year = date.getFullYear() // 2019
+    const day = date.getDate() // 23
+    const monthName = months[date.getMonth()]
+    const hours = date.getHours()
+    const minutes = date.getMinutes()
+
 
     if(uid === auth.currentUser.uid) {
       rightIcon = <div className="img_cont_msg">
@@ -160,7 +184,7 @@ export const Chat = () => (
           {leftIcon}
           <div className={messageClass}>
             {text}
-            <span className="msg_time">8:40 AM, Today</span>
+            <span className="msg_time">{year}/{monthName}/{day} {hours}:{minutes}</span>
           </div>
           {rightIcon}
         </div>
@@ -205,7 +229,7 @@ export const Chat = () => (
           </div>
           <div className="user_info">
             <span>Chat with Herpetario</span>
-            <p>1767 Messages</p>
+            <p>6 Messages</p>
           </div>
           <div className="video_cam">
             <span><i className="fas fa-video" /></span>
@@ -223,61 +247,6 @@ export const Chat = () => (
         </div>
       </div>
       <div className="card-body msg_card_body">
-        
-        <div className="d-flex justify-content-end mb-4">
-          <div className="msg_cotainer_send">
-            Hi Atun i am good tnx how about you?
-            <span className="msg_time_send">8:55 AM, Today</span>
-          </div>
-          <div className="img_cont_msg">
-            <img src="./said1.png" className="rounded-circle user_img_msg" />
-          </div>
-        </div>
-        <div className="d-flex justify-content-start mb-4">
-          <div className="img_cont_msg">
-            <img src="./mama1.png" className="rounded-circle user_img_msg" />
-          </div>
-          <div className="msg_cotainer">
-            I am good too, thank you for the dinner last night
-            <span className="msg_time">9:00 AM, Today</span>
-          </div>
-        </div>
-        <div className="d-flex justify-content-end mb-4">
-          <div className="msg_cotainer_send">
-            You are welcome
-            <span className="msg_time_send">9:05 AM, Today</span>
-          </div>
-          <div className="img_cont_msg">
-            <img src="./leo1.png" className="rounded-circle user_img_msg" />
-          </div>
-        </div>
-        <div className="d-flex justify-content-start mb-4">
-          <div className="img_cont_msg">
-            <img src="./mama1.png" className="rounded-circle user_img_msg" />
-          </div>
-          <div className="msg_cotainer">
-            I am looking for a new laptop
-            <span className="msg_time">9:07 AM, Today</span>
-          </div>
-        </div>
-        <div className="d-flex justify-content-end mb-4">
-          <div className="msg_cotainer_send">
-            Ok, thank you have a good day
-            <span className="msg_time_send">9:10 AM, Today</span>
-          </div>
-          <div className="img_cont_msg">
-            <img src="./aguero1.png" className="rounded-circle user_img_msg" />
-          </div>
-        </div>
-        <div className="d-flex justify-content-start mb-4">
-          <div className="img_cont_msg">
-            <img src="./mama1.png" className="rounded-circle user_img_msg" />
-          </div>
-          <div className="msg_cotainer">
-            Bye, see you
-            <span className="msg_time">9:12 AM, Today</span>
-          </div>
-        </div>
         {messages && messages.map(msg => <ChatMessage key = {msg.id} message = {msg} />)}
         <span ref = {dummy}></span>
       </div>

@@ -96,7 +96,7 @@ class Bygoogle extends Component{
         <div className="container-fluid mt-5">
             <div className="d-flex justify-content-center mt-4">
               <Link className="btn btn-lg px-3 btn-outline-info" onClick ={signInWithGoogle} role="button"><img src="./logogoogle1.png" height="30" alt="Google"></img>  &nbsp; Iniciar Sesión con Google</Link>
-              <Link className="btn btn-lg px-3 btn-outline-info" onClick ={signInWithFacebook} role="button"><img src="./logogoogle1.png" height="30" alt="Facebook"></img>  &nbsp; Iniciar Sesión con Facebook</Link>
+              <Link className="btn btn-lg px-3 btn-outline-info" onClick ={signInWithFacebook} role="button"><img src="./logofacebook2.png" height="30" alt="Facebook"></img>  &nbsp; Iniciar Sesión con Facebook</Link>
             </div>
           </div>
           {/* <FacebookLogin
