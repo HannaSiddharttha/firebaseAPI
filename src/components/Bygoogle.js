@@ -4,8 +4,8 @@ import firebase from 'firebase/app'
 import 'firebase/auth'
 import firebaseConfig  from '../firebaseConfig'
 import {Redirect} from 'react-router-dom'
-import {Link} from 'react-router-dom';
-import FacebookLogin from 'react-facebook-login';
+import {Link} from 'react-router-dom'
+import FacebookLogin from 'react-facebook-login'
 
 const firebaseApp = firebase.initializeApp(firebaseConfig)
 
