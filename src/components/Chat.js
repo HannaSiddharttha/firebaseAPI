@@ -35,7 +35,7 @@ const analytics = firebase.analytics()
 export const Chat = () => (
   
 
-     <div class="chat-container">
+     <div className="chat-container">
         <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css" />
         {/*---- Include the above in your HEAD tag --------*/}
         <title>Chat</title>

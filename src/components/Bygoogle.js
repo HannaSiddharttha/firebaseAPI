@@ -7,8 +7,6 @@ import {Redirect} from 'react-router-dom'
 import {Link} from 'react-router-dom'
 import FacebookLogin from 'react-facebook-login'
 
-const firebaseApp = firebase.initializeApp(firebaseConfig)
-
 class Bygoogle extends Component{
   /*
   componentDidMount () {
@@ -79,6 +77,9 @@ class Bygoogle extends Component{
                 <Link className="nav-link" to="/servicios">Nuestra Plataforma</Link>
               </li>
                <li className="nav-item">
+                <Link className="nav-link" to="/stock">Stock</Link>
+              </li>
+               <li className="nav-item">
                 <Link className="nav-link" to="/contactanos">Contactanos</Link>
               </li>
               <li className="nav-item">
@@ -95,8 +96,8 @@ class Bygoogle extends Component{
       <div>
         <div className="container-fluid mt-5">
             <div className="d-flex justify-content-center mt-4">
-              <Link className="btn btn-lg px-3 btn-outline-info" onClick ={signInWithGoogle} role="button"><img src="./logogoogle1.png" height="30" alt="Google"></img>  &nbsp; Iniciar Sesión con Google</Link>
-              <Link className="btn btn-lg px-3 btn-outline-info" onClick ={signInWithFacebook} role="button"><img src="./logofacebook2.png" height="30" alt="Facebook"></img>  &nbsp; Iniciar Sesión con Facebook</Link>
+              <Link className="btn btn-lg px-3 btn-outline-info" to="#" onClick ={signInWithGoogle} role="button"><img src="./logogoogle1.png" height="30" alt="Google"></img>  &nbsp; Iniciar Sesión con Google</Link>
+              <Link className="btn btn-lg px-3 btn-outline-info" to="#" onClick ={signInWithFacebook} role="button"><img src="./logofacebook2.png" height="30" alt="Facebook"></img>  &nbsp; Iniciar Sesión con Facebook</Link>
             </div>
           </div>
           {/* <FacebookLogin
@@ -116,10 +117,9 @@ class Bygoogle extends Component{
     }
 }
 
+const firebaseApp = firebase.initializeApp(firebaseConfig)
 const firebaseAppAuth = firebaseApp.auth();
-
 const providers = {
-
     googleProvider: new firebase.auth.GoogleAuthProvider(),
     facebookProvider: new firebase.auth.FacebookAuthProvider(),
 }
