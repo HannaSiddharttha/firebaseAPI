@@ -35,8 +35,9 @@ function App() {
          <Route path = "/mision" component = {Mision} />
          <Route path = "/nosotros" component = {Nosotros} />
          <Route path="/registro" component={Registro}/>
-          <Route path="/recuperar" component={Recuperar}/>
+         <Route path="/recuperar" component={Recuperar}/>
          <Route path = "/" component = {Inicio} />
+         {/* <Route path = "/chat" component = {Chat} />  */}
         </Switch>
         </div>
 

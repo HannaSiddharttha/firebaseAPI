@@ -10,12 +10,7 @@ import { useCollectionData } from 'react-firebase-hooks/firestore';
 
 if (!firebase.apps.length) {
    firebase.initializeApp({
-      //  apiKey: "AIzaSyAntyf9Hh-IGO4tPmA9mn5NpqkqvveB0do",
-      //  authDomain: "chatsexto.firebaseapp.com",
-      //  projectId: "chatsexto",
-      //  storageBucket: "chatsexto.appspot.com",
-      //  messagingSenderId: "214956267493",
-      //  appId: "1:214956267493:web:cae8c47ca40c8c29db010c"
+    
       apiKey: "AIzaSyCM_6EBeIn2Qmr31yWAXBEu4UL8kjfQCsE",
       authDomain: "modelo-d5e9b.firebaseapp.com",
       projectId: "modelo-d5e9b",
@@ -32,112 +27,184 @@ const auth = firebase.auth()
 const firestore = firebase.firestore()
 const analytics = firebase.analytics()
 
-export const Chat = () => (
-  
+// let currentRoom = null;
+// let setRoom = null;
+let doc = this;
 
-     <div className="chat-container">
-        <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css" />
-        {/*---- Include the above in your HEAD tag --------*/}
-        <title>Chat</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossOrigin="anonymous" />
-        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossOrigin="anonymous" />
-        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css" />
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script defer src="/js/chat-button.js"></script>
-        {/*Coded With Love By Mutiullah Samim*/}
-        <div className="container-fluid h-100">
-          <div className="row justify-content-center h-100">
-            <div className="col-md-4 col-xl-3 chat"><div className="card mb-sm-3 mb-md-0 contacts_card">
-                <div className="card-header">
-                  <div className="input-group">
-                    <input type="text" placeholder="Search..." name className="form-control search" />
-                    <div className="input-group-prepend">
-                      <span className="input-group-text search_btn"><i className="fas fa-search" /></span>
+// firebase
+//   .database()
+//   .ref('users')
+//   // .orderByChild('emailAddress')
+//   // .equalTo(email)
+//   .once('value', snap => console.log(snap.val()));
+
+// const users = firestore.collection('Users').get().then((snapshot) => {
+//   console.log(snapshot);
+//   snapshot.forEach(doc => {
+//     if (doc.exists) {
+//       let user = doc.data();
+//       // this.setState({ user: user});
+//       console.log("user state updated: ",user)
+//       console.log("user name: ",user);
+//       this.setState(prevState => ({
+//         users: [...prevState.users,doc.data()]
+//       }));
+//     }
+//   });
+// });
+// console.log("users:");
+// console.log(users);
+
+
+export const Chat = () => {
+  // class Chat extends Component {
+  
+    // render(){
+      const usersRef = firestore.collection('users')
+      const queryUsers = usersRef.orderBy('displayName').limit(25)
+      const [users] = useCollectionData(queryUsers)
+      let [currentRoom, setRoom] = useState(null);
+      // console.log(this)
+      // const [users] = useCollectionData(queryUsers)
+      console.log(users)
+
+      function UserChat(props) {
+        let user = props.user
+        let active = checkCurrentRoom(user) ? "active" : ""
+        console.log("user chat :"+active)
+        return(<>
+        <li className={active} onClick={() => setCurrentRoom(user)}>
+          <div className="d-flex bd-highlight">
+            <div className="img_cont">
+              <img src={user.photoURL} className="rounded-circle user_img" />
+              <span className="online_icon" />
+            </div>
+            <div className="user_info">
+              <span>{user.displayName}</span>
+              <p></p>
+            </div>
+          </div>
+        </li>
+        </>)
+      }
+
+      function checkCurrentRoom(user) {
+        // if(currentRoom) {
+        //   console.log("current room: "+JSON.stringify(currentRoom))
+        //   console.log("value: "+currentRoom.uid1);
+        // }
+        return currentRoom && 
+        (
+          (currentRoom.uid1 == user.uid && currentRoom.uid2 == auth.currentUser.uid) ||
+          (currentRoom.uid1 == auth.currentUser.uid && currentRoom.uid2 == user.uid)
+        ) 
+      }
+
+      // function setCurrentRoom(user) {
+      const setCurrentRoom = async (user) => {
+        console.log(user);
+        // console.log(doc);
+        const roomsRef = firestore.collection('rooms')
+
+        roomsRef.where('uid1', '==', auth.currentUser.uid).where('uid2', '==', user.uid).get().
+        then((e) => {
+          if(e.size >= 1) {
+            e.forEach((room) => {
+              console.log("room1")
+              console.log(room)
+              // currentRoom = room
+              // this.setState({ currentRoom: room});
+              setRoom(room.data())
+              // setRoom(currentRoom => [...currentRoom, room])
+              // setRoom(currentRoom => currentRoom = room)
+            })
+          } else {
+
+            // checar room2 en caso de que el primero no tenga nada
+            roomsRef.where('uid1', '==', user.uid).where('uid2', '==', auth.currentUser.uid).get().
+            then((e)=>{
+              console.log("room2")
+              if(e.size >= 1) {
+                e.forEach((room) => {
+                    currentRoom = room
+                })
+              } else {
+                console.log("add room")
+                currentRoom = roomsRef.add({ 
+                  uid1: auth.currentUser.uid,
+                  uid2: user.uid
+                })
+              }
+            })
+          }
+        })
+
+
+      // if(!currentRoom) {
+      //   console.log("add room")
+      //   currentRoom = roomsRef.add({ 
+      //     uid1: auth.currentUser.uid,
+      //     uid2: user.uid
+      //   })
+      // }
+      }
+
+
+      return (
+        <div className="chat-container">
+          <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css" />
+          
+          <title>Chat</title>
+          <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossOrigin="anonymous" />
+          <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossOrigin="anonymous" />
+          <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css" />
+          <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+          <script defer src="/js/chat-button.js"></script>
+          
+          <div className="container-fluid h-100">
+            <div className="row justify-content-center h-100">
+              <div className="col-md-4 col-xl-3 chat"><div className="card mb-sm-3 mb-md-0 contacts_card">
+                  <div className="card-header">
+                    <div className="input-group">
+                      <input type="text" placeholder="Search..." name className="form-control search" />
+                      <div className="input-group-prepend">
+                        <span className="input-group-text search_btn"><i className="fas fa-search" /></span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="card-body contacts_body">
-                  <ul className="contacts">
-                    <li className="active">
-                      <div className="d-flex bd-highlight">
-                        <div className="img_cont">
-                          <img src="./sophia1.png" className="rounded-circle user_img" />
-                          <span className="online_icon" />
+                  <div className="card-body contacts_body">
+                    <ul className="contacts">
+                      <li className="active">
+                        <div className="d-flex bd-highlight">
+                          <div className="img_cont">
+                            <img src="./sophia1.png" className="rounded-circle user_img" />
+                            <span className="online_icon" />
+                          </div>
+                          <div className="user_info">
+                            <span>Global Chat</span>
+                            <p></p>
+                          </div>
                         </div>
-                        <div className="user_info">
-                          <span>Sophia</span>
-                          <p>Sophia is online</p>
-                        </div>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="d-flex bd-highlight">
-                        <div className="img_cont">
-                          <img src="./hanna1.png" className="rounded-circle user_img" />
-                          <span className="online_icon offline" />
-                        </div>
-                        <div className="user_info">
-                          <span>Hanna</span>
-                          <p>Hanna left 7 mins ago</p>
-                        </div>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="d-flex bd-highlight">
-                        <div className="img_cont">
-                          <img src="./jade1.png" className="rounded-circle user_img" />
-                          <span className="online_icon" />
-                        </div>
-                        <div className="user_info">
-                          <span>Jade Bañuelos</span>
-                          <p>Jade is online</p>
-                        </div>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="d-flex bd-highlight">
-                        <div className="img_cont">
-                          <img src="./chris1.png" className="rounded-circle user_img" />
-                          <span className="online_icon offline" />
-                        </div>
-                        <div className="user_info">
-                          <span>Christian</span>
-                          <p>Christian left 30 mins ago</p>
-                        </div>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="d-flex bd-highlight">
-                        <div className="img_cont">
-                          <img src="./hannita1.png" className="rounded-circle user_img" />
-                          <span className="online_icon offline" />
-                        </div>
-                        <div className="user_info">
-                          <span>Hanna Romero</span>
-                          <p>Hanna left 50 mins ago</p>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-                <div className="card-footer" />
-              </div></div>
-            <div className="col-md-8 col-xl-6 chat">
-              
-
-            
-            <ChatContainer/>
-
-
+                      </li>
+                      {users && users.map(user => <UserChat user = {user} />)}
+                    </ul>
+                  </div>
+                  <div className="card-footer" />
+                </div></div>
+              <div className="col-md-8 col-xl-6 chat">
+                <ChatContainer/>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    );
+      );
+    // }
 
+}
+export default Chat;
+  
   function ChatMessage(props){
 
-    console.log(props)
     const {text,uid,photoURL} = props.message
     const messageClass = uid === auth.currentUser.uid ? 'msg_cotainer_send' : 'msg_cotainer'
     const positionClass = uid === auth.currentUser.uid ? 'justify-content-end' : 'justify-content-start'
@@ -204,7 +271,7 @@ export const Chat = () => (
   const query = messagesRef.orderBy('createdAt').limit(25)
 
   const [messages] = useCollectionData(query, {idField: 'id' })
-    console.log(messages);
+    //console.log(messages);
   const [formValue, setFormValue] = useState('')
   
   const sendMessage = async (e) =>{
@@ -224,6 +291,10 @@ export const Chat = () => (
 
   }
 
+  if(auth.currentUser) {
+    Alta()
+  }
+
   return(<>
     <div className="card">
       <div className="card-header msg_head">
@@ -233,8 +304,8 @@ export const Chat = () => (
             <span className="online_icon" />
           </div>
           <div className="user_info">
-            <span>Chat with Herpetario</span>
-            <p>6 Messages</p>
+            <span>Global chat</span>
+            <p></p>
           </div>
           <div className="video_cam">
             <span><i className="fas fa-video" /></span>
@@ -270,5 +341,101 @@ export const Chat = () => (
       </div>
     </div>
   </>)
+}
+
+function Alta(){
+  const Registro = async (e) => {
+    const registro = firestore.collection('users')
+    const {uid, photoURL, displayName, email} = auth.currentUser
+    const time = firebase.firestore.FieldValue.serverTimestamp()
+
+    await registro.add({
+      uid,
+      photoURL,
+      displayName,
+      email,
+      login: time,
+      lasttime: time
+    })
+
+  }
+
+  firestore.collection('users').where('email', '==', auth.currentUser.email).get().then(async (e)=>{
+
+    // console.log('TAM: ', e.size)
+
+    if (e.size == 0) {
+      Registro()
+    }
+    else if (e.size > 1) {
+    var IdToBeDeleted = ''
+
+    firestore.collection('users').where('email', '==', auth.currentUser.email).limit(1)
+    .get()
+    .then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+          IdToBeDeleted = doc.id
+          console.log("ID TO BE DELETED: ", IdToBeDeleted)
+
+          firestore.collection('users').doc(IdToBeDeleted).delete()
+      })
+    })
+    .catch((error) => {
+        console.log("Error: ", error)
+    })
+
+    }
+
+  })
+
+    /*const registro = firestore.collection('users')
+    const {uid, photoURL, displayName, email} = auth.currentUser
+    const hora = firebase.firestore.FieldValue.serverTimestamp()
+
+    var aux = registro.where('email', '==', auth.currentUser.email).get()
+
+    console.log(firestore.collection('users').where('email', '==', auth.currentUser.email).get())
+
+    if (true) {
+      registro.add({
+        uid,
+        photoURL,
+        displayName,
+        email,
+        login: hora,
+        lasttime: hora
+      })
+    }*/
+
+    /*if (aux.size > 1) {
+      firestore.collection('users').where('email', '==', auth.currentUser.email).limit(1).delete()
+    }*/
+
+    /*firestore.collection('users').where('email', '==', auth.currentUser.email)
+    .get()
+    .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            console.log(doc.id, " => ", doc.data())
+        })
+    })
+    .catch((error) => {
+        console.log("Error al obtener docs: ", error)
+    })*/
+
+    
+
+      
+
+    /*firestore.collection('users').doc(IdToBeDeleted)
+    .get().then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+          console.log("ID OBTENIDO: ", IdToBeDeleted)
+      })
+    })
+    .catch((error) => {
+        console.log("Error al obtener docs: ", error)
+    })*/
+
+    //console.log(IdToBeDeleted)
 }
   
