@@ -63,24 +63,45 @@ export const Chat = () => {
       const usersRef = firestore.collection('users')
       const queryUsers = usersRef.orderBy('displayName').limit(25)
       const [users] = useCollectionData(queryUsers)
-      let [currentRoom, setRoom] = useState(null);
-      // console.log(this)
-      // const [users] = useCollectionData(queryUsers)
-      console.log(users)
 
+      
+      let [currentRoom, setRoom] = useState(null);
+      // let [currentMessages, setMessages] = useState(null);
+      
+      const messagesRef = firestore.collection('messages')
+      const room_search = currentRoom ? currentRoom.id : null
+      console.log(room_search)
+      const queryMessages = messagesRef.where("roomId","==",room_search)
+      // const queryMessages = messagesRef.where("roomId","=",null).orderBy('createdAt').limit(1000)
+      // const queryMessages = messagesRef.orderBy('createdAt').limit(1000)
+      const [messages] = useCollectionData(queryMessages, {idField: 'id' })
+      // let messages = []
+      // setCurrentMessages() 
+
+      // setCurrentMessages()
+      // console.log("current room: "+currentRoom)
+      console.log(messages)
+      // currentMessages = messages
+      // setMessages(messages)
+      // console.log(this)
+      // console.log(users)
+      // console.log("chat loaded")
       function UserChat(props) {
         let user = props.user
         let active = checkCurrentRoom(user) ? "active" : ""
-        console.log("user chat :"+active)
+        let image = user ? user.photoURL : "./herpetario1.png"
+        let name = user ? user.displayName : "Global Chat"
+
+        // console.log("user chat :"+active)
         return(<>
         <li className={active} onClick={() => setCurrentRoom(user)}>
           <div className="d-flex bd-highlight">
             <div className="img_cont">
-              <img src={user.photoURL} className="rounded-circle user_img" />
+              <img src={image} className="rounded-circle user_img" />
               <span className="online_icon" />
             </div>
             <div className="user_info">
-              <span>{user.displayName}</span>
+              <span>{name}</span>
               <p></p>
             </div>
           </div>
@@ -89,34 +110,68 @@ export const Chat = () => {
       }
 
       function checkCurrentRoom(user) {
-        // if(currentRoom) {
-        //   console.log("current room: "+JSON.stringify(currentRoom))
-        //   console.log("value: "+currentRoom.uid1);
-        // }
-        return currentRoom && 
-        (
-          (currentRoom.uid1 == user.uid && currentRoom.uid2 == auth.currentUser.uid) ||
-          (currentRoom.uid1 == auth.currentUser.uid && currentRoom.uid2 == user.uid)
-        ) 
+        // console.log("room")
+        // console.log(currentRoom)
+        // console.log("user")
+        // console.log(user)
+
+        if(!currentRoom && !user) {
+          return true
+        }
+
+        
+        if(currentRoom) {
+          
+          if(!user) {
+            return false
+          }
+
+          const data = currentRoom.data()
+          if((data.uid1 == user.uid && data.uid2 == auth.currentUser.uid) ||
+          (data.uid1 == auth.currentUser.uid && data.uid2 == user.uid)) {
+            return true
+          }
+        }
+        return false
+      }
+
+      function setCurrentMessages() {
+        const room_search = currentRoom ? currentRoom.id : null
+        messagesRef.where("roomId", "==",room_search).get().then((e) => {
+          console.log("docs")
+          console.log(e.docs)
+          // setMessages(e.docs)
+          let messages_array = [];
+          e.forEach((message) => {
+            messages_array.push(message.data());
+            // console.log(message.data())
+          })
+          // setMessages(messages)
+          messages = messages_array
+          console.log("messages: "+messages)
+        })
+        
       }
 
       // function setCurrentRoom(user) {
       const setCurrentRoom = async (user) => {
-        console.log(user);
-        // console.log(doc);
+        
+        if(user == null) {
+          setRoom(null)
+          // setCurrentMessages()
+          return
+        }
+        
         const roomsRef = firestore.collection('rooms')
 
         roomsRef.where('uid1', '==', auth.currentUser.uid).where('uid2', '==', user.uid).get().
         then((e) => {
           if(e.size >= 1) {
             e.forEach((room) => {
-              console.log("room1")
-              console.log(room)
-              // currentRoom = room
-              // this.setState({ currentRoom: room});
-              setRoom(room.data())
-              // setRoom(currentRoom => [...currentRoom, room])
-              // setRoom(currentRoom => currentRoom = room)
+              // console.log("room1")
+              // console.log(room)
+              setRoom(room)
+              // setCurrentMessages()
             })
           } else {
 
@@ -126,7 +181,9 @@ export const Chat = () => {
               console.log("room2")
               if(e.size >= 1) {
                 e.forEach((room) => {
-                    currentRoom = room
+                  // console.log(room.id)
+                  setRoom(room)
+                  // setCurrentMessages()
                 })
               } else {
                 console.log("add room")
@@ -149,6 +206,81 @@ export const Chat = () => {
       // }
       }
 
+      function ChatContainer() {
+
+        const dummy = useRef()
+        const [formValue, setFormValue] = useState('')
+        
+        const sendMessage = async (e) => {
+      
+          e.preventDefault()
+          const {uid, photoURL} = auth.currentUser
+      
+          await messagesRef.add({
+            text: formValue,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            uid: uid,
+            photoURL: photoURL,
+            roomId: currentRoom ? currentRoom.id : null
+          })
+      
+          setFormValue('')
+
+          // dummy.current.scrollIntoView({behavior: 'smooth'})
+      
+        }
+      
+        if(auth.currentUser) {
+          Alta()
+        }
+      
+        return(<>
+          <div className="card">
+            <div className="card-header msg_head">
+              <div className="d-flex bd-highlight">
+                <div className="img_cont">
+                  <img src="./herpetario1.png" className="rounded-circle user_img" />
+                  <span className="online_icon" />
+                </div>
+                <div className="user_info">
+                  <span>Global chat</span>
+                  <p></p>
+                </div>
+                <div className="video_cam">
+                  <span><i className="fas fa-video" /></span>
+                  <span><i className="fas fa-phone" /></span>
+                </div>
+              </div>
+              <span id="action_menu_btn"><i className="fas fa-ellipsis-v" /></span>
+              <div className="action_menu">
+                <ul>
+                  <li><i className="fas fa-user-circle" /> View profile</li>
+                  <li><i className="fas fa-users" /> Add to close friends</li>
+                  <li><i className="fas fa-plus" /> Add to group</li>
+                  <li><i className="fas fa-ban" /> Block</li>
+                </ul>
+              </div>
+            </div>
+            <div className="card-body msg_card_body">
+              {messages && messages.map(msg => <ChatMessage key = {msg.id} message = {msg} />)}
+              <span ref = {dummy}></span>
+            </div>
+            <div className="card-footer">
+              <form onSubmit = {sendMessage}>
+                <div className="input-group">
+                  <div className="input-group-append">
+                    <span className="input-group-text attach_btn"><i className="fas fa-paperclip" /></span>
+                  </div>
+                  <textarea value = {formValue} onChange={(e) => setFormValue(e.target.value)} className="form-control type_msg" placeholder="Type your message..." />
+                  <div className="input-group-append">
+                    <button type="submit" className="input-group-text send_btn"><i className="fas fa-location-arrow" /></button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </>)
+      }
 
       return (
         <div className="chat-container">
@@ -174,7 +306,7 @@ export const Chat = () => {
                   </div>
                   <div className="card-body contacts_body">
                     <ul className="contacts">
-                      <li className="active">
+                      {/* <li className="active">
                         <div className="d-flex bd-highlight">
                           <div className="img_cont">
                             <img src="./sophia1.png" className="rounded-circle user_img" />
@@ -185,7 +317,8 @@ export const Chat = () => {
                             <p></p>
                           </div>
                         </div>
-                      </li>
+                      </li> */}
+                      <UserChat user = {null} />
                       {users && users.map(user => <UserChat user = {user} />)}
                     </ul>
                   </div>
@@ -262,85 +395,6 @@ export default Chat;
         </div>
 
     </>)
-}
-
-  function ChatContainer(){
-
-  const dummy = useRef()
-  const messagesRef = firestore.collection('messages')
-  const query = messagesRef.orderBy('createdAt').limit(25)
-
-  const [messages] = useCollectionData(query, {idField: 'id' })
-    //console.log(messages);
-  const [formValue, setFormValue] = useState('')
-  
-  const sendMessage = async (e) =>{
-
-    e.preventDefault()
-    const {uid, photoURL} = auth.currentUser
-
-    await messagesRef.add({
-      text: formValue,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      uid,
-      photoURL
-    })
-
-    setFormValue('')
-    dummy.current.scrollIntoView({behavior: 'smooth'})
-
-  }
-
-  if(auth.currentUser) {
-    Alta()
-  }
-
-  return(<>
-    <div className="card">
-      <div className="card-header msg_head">
-        <div className="d-flex bd-highlight">
-          <div className="img_cont">
-            <img src="./herpetario1.png" className="rounded-circle user_img" />
-            <span className="online_icon" />
-          </div>
-          <div className="user_info">
-            <span>Global chat</span>
-            <p></p>
-          </div>
-          <div className="video_cam">
-            <span><i className="fas fa-video" /></span>
-            <span><i className="fas fa-phone" /></span>
-          </div>
-        </div>
-        <span id="action_menu_btn"><i className="fas fa-ellipsis-v" /></span>
-        <div className="action_menu">
-          <ul>
-            <li><i className="fas fa-user-circle" /> View profile</li>
-            <li><i className="fas fa-users" /> Add to close friends</li>
-            <li><i className="fas fa-plus" /> Add to group</li>
-            <li><i className="fas fa-ban" /> Block</li>
-          </ul>
-        </div>
-      </div>
-      <div className="card-body msg_card_body">
-        {messages && messages.map(msg => <ChatMessage key = {msg.id} message = {msg} />)}
-        <span ref = {dummy}></span>
-      </div>
-      <div className="card-footer">
-        <form onSubmit = {sendMessage}>
-          <div className="input-group">
-            <div className="input-group-append">
-              <span className="input-group-text attach_btn"><i className="fas fa-paperclip" /></span>
-            </div>
-            <textarea value = {formValue} onChange={(e) => setFormValue(e.target.value)} className="form-control type_msg" placeholder="Type your message..." />
-            <div className="input-group-append">
-              <button type="submit" className="input-group-text send_btn"><i className="fas fa-location-arrow" /></button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  </>)
 }
 
 function Alta(){
