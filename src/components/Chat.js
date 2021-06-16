@@ -67,14 +67,37 @@ export const Chat = () => {
       
       let [currentRoom, setRoom] = useState(null);
       // let [currentMessages, setMessages] = useState(null);
+
+      let currentChatUser = null;
+      // if(currentRoom) {
+        // console.log("chat 1: "+currentRoom)  
+      const queryChatUser1 = usersRef.where("uid","==",currentRoom ? currentRoom.data().uid1 : null)
+      const [chatUser1] = useCollectionData(queryChatUser1, {idField: 'id' })
+      // console.log("chat 1: "+chatUser1)
+      const queryChatUser2 = usersRef.where("uid","==",currentRoom ? currentRoom.data().uid2 : null)
+      const [chatUser2] = useCollectionData(queryChatUser2, {idField: 'id' })
+      // console.log("chat 2: "+chatUser2)
+
+      if(chatUser1 && chatUser1.uid != auth.currentUser.uid) {
+        currentChatUser = chatUser1
+      }
+      else if(chatUser2 && chatUser2.uid != auth.currentUser.uid) {
+        currentChatUser = chatUser2
+      }
+      console.log("current chat user: "+currentChatUser)
+
+      // }
       
+
       const messagesRef = firestore.collection('messages')
       const room_search = currentRoom ? currentRoom.id : null
-      console.log(room_search)
+      // console.log(room_search)
       const queryMessages = messagesRef.where("roomId","==",room_search)
-      // const queryMessages = messagesRef.where("roomId","=",null).orderBy('createdAt').limit(1000)
+      // const queryMessages = messagesRef.where("roomId","==",room_search).orderBy('createdAt').limit(1000)
       // const queryMessages = messagesRef.orderBy('createdAt').limit(1000)
       const [messages] = useCollectionData(queryMessages, {idField: 'id' })
+
+
       // let messages = []
       // setCurrentMessages() 
 
@@ -233,17 +256,21 @@ export const Chat = () => {
         if(auth.currentUser) {
           Alta()
         }
-      
+
+        let image = currentChatUser && currentChatUser[0] ? currentChatUser[0].photoURL : "./herpetario1.png"
+        let name = currentChatUser && currentChatUser[0] ? currentChatUser[0].displayName : "Global chat"
+        console.log("image: "+image)
+        console.log(currentChatUser)
         return(<>
           <div className="card">
             <div className="card-header msg_head">
               <div className="d-flex bd-highlight">
                 <div className="img_cont">
-                  <img src="./herpetario1.png" className="rounded-circle user_img" />
+                  <img src={image} className="rounded-circle user_img" />
                   <span className="online_icon" />
                 </div>
                 <div className="user_info">
-                  <span>Global chat</span>
+                  <span>{name}</span>
                   <p></p>
                 </div>
                 <div className="video_cam">
