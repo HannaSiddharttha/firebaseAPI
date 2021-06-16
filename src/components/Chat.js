@@ -34,7 +34,8 @@ export const Chat = () => {
     // render(){
       const dummy = useRef()
       const usersRef = firestore.collection('users')
-      const queryUsers = usersRef.where('uid','!=',auth.currentUser.uid).orderBy('uid').limit(25)
+      let uid = auth.currentUser ? auth.currentUser.uid : null
+      const queryUsers = usersRef.where('uid','!=',uid).orderBy('uid').limit(25)
       let [users] = useCollectionData(queryUsers)
 
       let [currentRoom, setRoom] = useState(null);
@@ -56,22 +57,12 @@ export const Chat = () => {
 
       const messagesRef = firestore.collection('messages')
       const room_search = currentRoom ? currentRoom.id : null
-      // console.log(room_search)
       const queryMessages = messagesRef.where("roomId","==",room_search)
-      // const queryMessages = messagesRef.where("roomId","==",room_search).orderBy('createdAt').limit(1000)
-      // const queryMessages = messagesRef.orderBy('createdAt').limit(1000)
       let [messages] = useCollectionData(queryMessages, {idField: 'id' })
       if(messages) {
         messages = messages.sort((a,b) =>a.createdAt - b.createdAt)
       }
 
-      // let messages = []
-      // setCurrentMessages() 
-
-      // setCurrentMessages()
-      // console.log("current room: "+currentRoom)
-      // currentMessages = messages
-      // setMessages(messages)
       function UserChat(props) {
         let user = props.user
         let active = checkCurrentRoom(user) ? "active" : ""
