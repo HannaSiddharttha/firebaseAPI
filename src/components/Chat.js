@@ -1,3 +1,4 @@
+
 import React, {useRef, useState} from 'react';
 import './styles/chat.css'
 import firebase from 'firebase/app';
@@ -27,67 +28,31 @@ const auth = firebase.auth()
 const firestore = firebase.firestore()
 const analytics = firebase.analytics()
 
-// let currentRoom = null;
-// let setRoom = null;
-let doc = this;
-
-// firebase
-//   .database()
-//   .ref('users')
-//   // .orderByChild('emailAddress')
-//   // .equalTo(email)
-//   .once('value', snap => console.log(snap.val()));
-
-// const users = firestore.collection('Users').get().then((snapshot) => {
-//   console.log(snapshot);
-//   snapshot.forEach(doc => {
-//     if (doc.exists) {
-//       let user = doc.data();
-//       // this.setState({ user: user});
-//       console.log("user state updated: ",user)
-//       console.log("user name: ",user);
-//       this.setState(prevState => ({
-//         users: [...prevState.users,doc.data()]
-//       }));
-//     }
-//   });
-// });
-// console.log("users:");
-// console.log(users);
-
-
 export const Chat = () => {
   // class Chat extends Component {
   
     // render(){
+      const dummy = useRef()
       const usersRef = firestore.collection('users')
-      const queryUsers = usersRef.orderBy('displayName').limit(25)
-      const [users] = useCollectionData(queryUsers)
+      const queryUsers = usersRef.where('uid','!=',auth.currentUser.uid).orderBy('uid').limit(25)
+      let [users] = useCollectionData(queryUsers)
 
-      
       let [currentRoom, setRoom] = useState(null);
       // let [currentMessages, setMessages] = useState(null);
 
       let currentChatUser = null;
-      // if(currentRoom) {
-        // console.log("chat 1: "+currentRoom)  
+  
       const queryChatUser1 = usersRef.where("uid","==",currentRoom ? currentRoom.data().uid1 : null)
       const [chatUser1] = useCollectionData(queryChatUser1, {idField: 'id' })
-      // console.log("chat 1: "+chatUser1)
       const queryChatUser2 = usersRef.where("uid","==",currentRoom ? currentRoom.data().uid2 : null)
       const [chatUser2] = useCollectionData(queryChatUser2, {idField: 'id' })
-      // console.log("chat 2: "+chatUser2)
 
-      if(chatUser1 && chatUser1.uid != auth.currentUser.uid) {
-        currentChatUser = chatUser1
+      if(chatUser1 && chatUser1[0] && chatUser1[0].uid !== auth.currentUser.uid) {
+        currentChatUser = chatUser1[0]
       }
-      else if(chatUser2 && chatUser2.uid != auth.currentUser.uid) {
-        currentChatUser = chatUser2
+      else if(chatUser2 && chatUser2[0] && chatUser2[0].uid !== auth.currentUser.uid) {
+        currentChatUser = chatUser2[0]
       }
-      console.log("current chat user: "+currentChatUser)
-
-      // }
-      
 
       const messagesRef = firestore.collection('messages')
       const room_search = currentRoom ? currentRoom.id : null
@@ -95,20 +60,18 @@ export const Chat = () => {
       const queryMessages = messagesRef.where("roomId","==",room_search)
       // const queryMessages = messagesRef.where("roomId","==",room_search).orderBy('createdAt').limit(1000)
       // const queryMessages = messagesRef.orderBy('createdAt').limit(1000)
-      const [messages] = useCollectionData(queryMessages, {idField: 'id' })
-
+      let [messages] = useCollectionData(queryMessages, {idField: 'id' })
+      if(messages) {
+        messages = messages.sort((a,b) =>a.createdAt - b.createdAt)
+      }
 
       // let messages = []
       // setCurrentMessages() 
 
       // setCurrentMessages()
       // console.log("current room: "+currentRoom)
-      console.log(messages)
       // currentMessages = messages
       // setMessages(messages)
-      // console.log(this)
-      // console.log(users)
-      // console.log("chat loaded")
       function UserChat(props) {
         let user = props.user
         let active = checkCurrentRoom(user) ? "active" : ""
@@ -133,18 +96,12 @@ export const Chat = () => {
       }
 
       function checkCurrentRoom(user) {
-        // console.log("room")
-        // console.log(currentRoom)
-        // console.log("user")
-        // console.log(user)
 
         if(!currentRoom && !user) {
           return true
         }
 
-        
         if(currentRoom) {
-          
           if(!user) {
             return false
           }
@@ -158,23 +115,23 @@ export const Chat = () => {
         return false
       }
 
-      function setCurrentMessages() {
-        const room_search = currentRoom ? currentRoom.id : null
-        messagesRef.where("roomId", "==",room_search).get().then((e) => {
-          console.log("docs")
-          console.log(e.docs)
-          // setMessages(e.docs)
-          let messages_array = [];
-          e.forEach((message) => {
-            messages_array.push(message.data());
-            // console.log(message.data())
-          })
-          // setMessages(messages)
-          messages = messages_array
-          console.log("messages: "+messages)
-        })
+      // function setCurrentMessages() {
+      //   const room_search = currentRoom ? currentRoom.id : null
+      //   messagesRef.where("roomId", "==",room_search).get().then((e) => {
+      //     console.log("docs")
+      //     console.log(e.docs)
+      //     // setMessages(e.docs)
+      //     let messages_array = [];
+      //     e.forEach((message) => {
+      //       messages_array.push(message.data());
+      //       // console.log(message.data())
+      //     })
+      //     // setMessages(messages)
+      //     messages = messages_array
+      //     console.log("messages: "+messages)
+      //   })
         
-      }
+      // }
 
       // function setCurrentRoom(user) {
       const setCurrentRoom = async (user) => {
@@ -201,7 +158,7 @@ export const Chat = () => {
             // checar room2 en caso de que el primero no tenga nada
             roomsRef.where('uid1', '==', user.uid).where('uid2', '==', auth.currentUser.uid).get().
             then((e)=>{
-              console.log("room2")
+              // console.log("room2")
               if(e.size >= 1) {
                 e.forEach((room) => {
                   // console.log(room.id)
@@ -209,7 +166,7 @@ export const Chat = () => {
                   // setCurrentMessages()
                 })
               } else {
-                console.log("add room")
+                // console.log("add room")
                 currentRoom = roomsRef.add({ 
                   uid1: auth.currentUser.uid,
                   uid2: user.uid
@@ -231,7 +188,6 @@ export const Chat = () => {
 
       function ChatContainer() {
 
-        const dummy = useRef()
         const [formValue, setFormValue] = useState('')
         
         const sendMessage = async (e) => {
@@ -249,18 +205,16 @@ export const Chat = () => {
       
           setFormValue('')
 
-          // dummy.current.scrollIntoView({behavior: 'smooth'})
-      
+          dummy.current.scrollIntoView({behavior: 'smooth'})
         }
       
         if(auth.currentUser) {
           Alta()
         }
 
-        let image = currentChatUser && currentChatUser[0] ? currentChatUser[0].photoURL : "./herpetario1.png"
-        let name = currentChatUser && currentChatUser[0] ? currentChatUser[0].displayName : "Global chat"
-        console.log("image: "+image)
-        console.log(currentChatUser)
+        let image = currentChatUser ? currentChatUser.photoURL : "./herpetario1.png"
+        let name = currentChatUser ? currentChatUser.displayName : "Global chat"
+
         return(<>
           <div className="card">
             <div className="card-header msg_head">
@@ -290,7 +244,7 @@ export const Chat = () => {
             </div>
             <div className="card-body msg_card_body">
               {messages && messages.map(msg => <ChatMessage key = {msg.id} message = {msg} />)}
-              <span ref = {dummy}></span>
+              <div ref = {dummy}></div>
             </div>
             <div className="card-footer">
               <form onSubmit = {sendMessage}>
@@ -333,18 +287,6 @@ export const Chat = () => {
                   </div>
                   <div className="card-body contacts_body">
                     <ul className="contacts">
-                      {/* <li className="active">
-                        <div className="d-flex bd-highlight">
-                          <div className="img_cont">
-                            <img src="./sophia1.png" className="rounded-circle user_img" />
-                            <span className="online_icon" />
-                          </div>
-                          <div className="user_info">
-                            <span>Global Chat</span>
-                            <p></p>
-                          </div>
-                        </div>
-                      </li> */}
                       <UserChat user = {null} />
                       {users && users.map(user => <UserChat user = {user} />)}
                     </ul>
@@ -359,7 +301,6 @@ export const Chat = () => {
         </div>
       );
     // }
-
 }
 export default Chat;
   
@@ -468,55 +409,4 @@ function Alta(){
     }
 
   })
-
-    /*const registro = firestore.collection('users')
-    const {uid, photoURL, displayName, email} = auth.currentUser
-    const hora = firebase.firestore.FieldValue.serverTimestamp()
-
-    var aux = registro.where('email', '==', auth.currentUser.email).get()
-
-    console.log(firestore.collection('users').where('email', '==', auth.currentUser.email).get())
-
-    if (true) {
-      registro.add({
-        uid,
-        photoURL,
-        displayName,
-        email,
-        login: hora,
-        lasttime: hora
-      })
-    }*/
-
-    /*if (aux.size > 1) {
-      firestore.collection('users').where('email', '==', auth.currentUser.email).limit(1).delete()
-    }*/
-
-    /*firestore.collection('users').where('email', '==', auth.currentUser.email)
-    .get()
-    .then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-            console.log(doc.id, " => ", doc.data())
-        })
-    })
-    .catch((error) => {
-        console.log("Error al obtener docs: ", error)
-    })*/
-
-    
-
-      
-
-    /*firestore.collection('users').doc(IdToBeDeleted)
-    .get().then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-          console.log("ID OBTENIDO: ", IdToBeDeleted)
-      })
-    })
-    .catch((error) => {
-        console.log("Error al obtener docs: ", error)
-    })*/
-
-    //console.log(IdToBeDeleted)
 }
-  
