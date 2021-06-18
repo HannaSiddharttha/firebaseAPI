@@ -34,9 +34,43 @@ export const Chat = () => {
     // render(){
       const dummy = useRef()
       const usersRef = firestore.collection('users')
+      const messagesRef = firestore.collection('messages')
+      const roomsRef = firestore.collection('rooms')
+
       let uid = auth.currentUser ? auth.currentUser.uid : null
+
       const queryUsers = usersRef.where('uid','!=',uid).orderBy('uid').limit(25)
       let [users] = useCollectionData(queryUsers)
+
+      const queryCurrentUser = usersRef.where('uid','==',uid)
+      let [currentUserBD] = useCollectionData(queryCurrentUser)
+      if(currentUserBD) {
+        currentUserBD = currentUserBD[0]
+      }
+
+      const querySupportUser = usersRef.where('isSupport','==',true)
+      let [supportUser] = useCollectionData(querySupportUser)
+
+      console.log("support:")
+      // console.log(users)
+      // console.log(supportUser)
+      // supportUser = supportUser[0]
+
+      const queryRooms = roomsRef.where('isSupport','==',true);
+      let [rooms] = useCollectionData(queryRooms)
+
+      // // si el que inició sesión es soporte se carga diferente los usuarios disponibles
+      if(supportUser && supportUser[0].uid == auth.currentUser.uid) {
+
+        users.length = 0
+
+      //   // se busca los rooms que son de soporte y se cargan solo los usuarios que tengan un chat en soporte actualmente
+        rooms.forEach((room) => {
+          users.push(room.data().user);
+          console.log(room.data())
+        })
+
+      }
 
       let [currentRoom, setRoom] = useState(null);
       // let [currentMessages, setMessages] = useState(null);
@@ -55,10 +89,11 @@ export const Chat = () => {
         currentChatUser = chatUser2[0]
       }
 
-      const messagesRef = firestore.collection('messages')
       const room_search = currentRoom ? currentRoom.id : null
       const queryMessages = messagesRef.where("roomId","==",room_search)
       let [messages] = useCollectionData(queryMessages, {idField: 'id' })
+
+      // ordenar mensajes
       if(messages) {
         messages = messages.sort((a,b) =>a.createdAt - b.createdAt)
       }
@@ -68,6 +103,12 @@ export const Chat = () => {
         let active = checkCurrentRoom(user) ? "active" : ""
         let image = user ? user.photoURL : "./herpetario1.png"
         let name = user ? user.displayName : "Global Chat"
+
+        const isSupport = user && user.isSupport
+        if(isSupport) {
+          image = "./herpetario1.png"
+          name = "SOPORTE TÉCNICO"
+        }
 
         // console.log("user chat :"+active)
         return(<>
@@ -133,14 +174,14 @@ export const Chat = () => {
           return
         }
         
-        const roomsRef = firestore.collection('rooms')
+        // const roomsRef = firestore.collection('rooms')
 
         roomsRef.where('uid1', '==', auth.currentUser.uid).where('uid2', '==', user.uid).get().
         then((e) => {
           if(e.size >= 1) {
             e.forEach((room) => {
               // console.log("room1")
-              // console.log(room)
+              // console.log(room.data())
               setRoom(room)
               // setCurrentMessages()
             })
@@ -149,7 +190,7 @@ export const Chat = () => {
             // checar room2 en caso de que el primero no tenga nada
             roomsRef.where('uid1', '==', user.uid).where('uid2', '==', auth.currentUser.uid).get().
             then((e)=>{
-              // console.log("room2")
+              console.log("room2")
               if(e.size >= 1) {
                 e.forEach((room) => {
                   // console.log(room.id)
@@ -158,9 +199,15 @@ export const Chat = () => {
                 })
               } else {
                 // console.log("add room")
+                const isSupport = user && user.isSupport
+                // console.log(auth.currentUser)
+                // console.log(currentUserBD)
                 currentRoom = roomsRef.add({ 
                   uid1: auth.currentUser.uid,
-                  uid2: user.uid
+                  uid2: user.uid,
+                  isSupport: isSupport,
+                  user1: user,
+                  user2: currentUserBD
                 })
               }
             })
@@ -205,6 +252,12 @@ export const Chat = () => {
 
         let image = currentChatUser ? currentChatUser.photoURL : "./herpetario1.png"
         let name = currentChatUser ? currentChatUser.displayName : "Global chat"
+        console.log("hola")
+        console.log(currentChatUser)
+        if(currentChatUser && currentChatUser.isSupport) {
+          image = "./herpetario1.png"
+          name = "SOPORTE TÉCNICO"
+        }
 
         return(<>
           <div className="card">
@@ -279,7 +332,7 @@ export const Chat = () => {
                   <div className="card-body contacts_body">
                     <ul className="contacts">
                       <UserChat user = {null} />
-                      {users && users.map(user => <UserChat user = {user} />)}
+                      {users && currentUserBD && users.map(user => <UserChat user = {user} />)}
                     </ul>
                   </div>
                   <div className="card-footer" />
@@ -368,7 +421,8 @@ function Alta(){
       displayName,
       email,
       login: time,
-      lasttime: time
+      lasttime: time,
+      isSupport: false
     })
 
   }
