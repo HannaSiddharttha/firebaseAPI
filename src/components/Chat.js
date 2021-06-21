@@ -48,7 +48,7 @@ export const Chat = () => {
         currentUserBD = currentUserBD[0]
       }
 
-      let supportImage = "./herpetario1.png"
+      let supportImage = "./suport3.png"
       let supportName = "SOPORTE TÉCNICO"
 
       const querySupportUser = usersRef.where('isSupport','==',true)
@@ -106,7 +106,7 @@ export const Chat = () => {
       function UserChat(props) {
         let user = props.user
         let active = checkCurrentRoom(user) ? "active" : ""
-        let image = user ? user.photoURL : "./herpetario1.png"
+        let image = user ? user.photoURL : "./group3.png"
         let name = user ? user.displayName : "Global Chat"
 
         const isSupport = user && user.isSupport
@@ -254,7 +254,7 @@ export const Chat = () => {
           Alta()
         }
 
-        let image = currentChatUser ? currentChatUser.photoURL : "./herpetario1.png"
+        let image = currentChatUser ? currentChatUser.photoURL : "./group3.png"
         let name = currentChatUser ? currentChatUser.displayName : "Global chat"
 
         if(currentChatUser && currentChatUser.isSupport) {
