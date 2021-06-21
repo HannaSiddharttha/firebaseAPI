@@ -48,27 +48,32 @@ export const Chat = () => {
         currentUserBD = currentUserBD[0]
       }
 
+      let supportImage = "./herpetario1.png"
+      let supportName = "SOPORTE TÉCNICO"
+
       const querySupportUser = usersRef.where('isSupport','==',true)
       let [supportUser] = useCollectionData(querySupportUser)
-
-      console.log("support:")
-      // console.log(users)
-      // console.log(supportUser)
-      // supportUser = supportUser[0]
 
       const queryRooms = roomsRef.where('isSupport','==',true);
       let [rooms] = useCollectionData(queryRooms)
 
-      // // si el que inició sesión es soporte se carga diferente los usuarios disponibles
+      // si el que inició sesión es soporte se carga diferente los usuarios disponibles
       if(supportUser && supportUser[0].uid == auth.currentUser.uid) {
 
-        users.length = 0
-
-      //   // se busca los rooms que son de soporte y se cargan solo los usuarios que tengan un chat en soporte actualmente
-        rooms.forEach((room) => {
-          users.push(room.data().user);
-          console.log(room.data())
-        })
+        if(users) {
+          users.length = 0
+  
+          // se busca los rooms que son de soporte y se cargan solo los usuarios que tengan un chat en soporte actualmente
+          if(rooms) {
+            rooms.forEach((room) => {
+              if(currentUserBD.uid == room.uid1) {
+                users.push(room.user1);
+              } else {
+                users.push(room.user2);
+              }
+            })
+          }  
+        }
 
       }
 
@@ -106,11 +111,14 @@ export const Chat = () => {
 
         const isSupport = user && user.isSupport
         if(isSupport) {
-          image = "./herpetario1.png"
-          name = "SOPORTE TÉCNICO"
+          image = supportImage
+          name = supportName
         }
 
-        // console.log("user chat :"+active)
+        if(currentUserBD && currentUserBD.isSupport && (!user || isSupport)) {
+          return(<></>)
+        }
+
         return(<>
         <li className={active} onClick={() => setCurrentRoom(user)}>
           <div className="d-flex bd-highlight">
@@ -190,18 +198,14 @@ export const Chat = () => {
             // checar room2 en caso de que el primero no tenga nada
             roomsRef.where('uid1', '==', user.uid).where('uid2', '==', auth.currentUser.uid).get().
             then((e)=>{
-              console.log("room2")
               if(e.size >= 1) {
                 e.forEach((room) => {
-                  // console.log(room.id)
                   setRoom(room)
                   // setCurrentMessages()
                 })
               } else {
-                // console.log("add room")
                 const isSupport = user && user.isSupport
-                // console.log(auth.currentUser)
-                // console.log(currentUserBD)
+                
                 currentRoom = roomsRef.add({ 
                   uid1: auth.currentUser.uid,
                   uid2: user.uid,
@@ -252,11 +256,10 @@ export const Chat = () => {
 
         let image = currentChatUser ? currentChatUser.photoURL : "./herpetario1.png"
         let name = currentChatUser ? currentChatUser.displayName : "Global chat"
-        console.log("hola")
-        console.log(currentChatUser)
+
         if(currentChatUser && currentChatUser.isSupport) {
-          image = "./herpetario1.png"
-          name = "SOPORTE TÉCNICO"
+          image = supportImage
+          name = supportName
         }
 
         return(<>
