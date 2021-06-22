@@ -257,10 +257,16 @@ export const Chat = () => {
 
         let image = currentChatUser ? currentChatUser.photoURL : "./group3.png"
         let name = currentChatUser ? currentChatUser.displayName : "Global chat"
-
+        let hideImage = ""
         if(currentChatUser && currentChatUser.isSupport) {
           image = supportImage
           name = supportName
+        }
+
+        if(currentUserBD && currentUserBD.isSupport && !currentChatUser) {
+          name = "Da click al contacto que deseas atender"
+          hideImage = "hidden"
+          messages = null
         }
 
         return(<>
@@ -268,8 +274,8 @@ export const Chat = () => {
             <div className="card-header msg_head">
               <div className="d-flex bd-highlight">
                 <div className="img_cont">
-                  <img src={image} className="rounded-circle user_img" />
-                  <span className="online_icon" />
+                  <img src={image} className={`rounded-circle user_img ${hideImage}`} />
+                  <span className={`online_icon ${hideImage}`} />
                 </div>
                 <div className="user_info">
                   <span>{name}</span>
