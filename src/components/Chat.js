@@ -58,9 +58,10 @@ export const Chat = () => {
       let [rooms] = useCollectionData(queryRooms)
 
       // si el que inició sesión es soporte se carga diferente los usuarios disponibles
-      if(supportUser && supportUser[0].uid == auth.currentUser.uid) {
+      if(supportUser && supportUser[0] && supportUser[0].uid == auth.currentUser.uid) {
 
         if(users) {
+          console.log(users)
           users.length = 0
   
           // se busca los rooms que son de soporte y se cargan solo los usuarios que tengan un chat en soporte actualmente
